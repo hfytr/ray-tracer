@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::Write,
+    io::BufWriter,
     ops::{Index, IndexMut},
 };
 
@@ -20,19 +20,30 @@ impl Image {
         }
     }
 
-    pub fn write_to_ppm(&self, path: &str) {
+    pub fn write_to_png(&self, path: &str) {
         let mut file = File::create(path).unwrap();
-        let mut text = String::new();
-        text.push_str(&format!("P6\n{} {}\n255\n", self.shape.0, self.shape.1));
-        for (i, p) in self.pixels.iter().enumerate() {
-            text.push_str(&format!("{} {} {}", p[0], p[1], p[2]));
-            if i == self.shape.0 - 1 {
-                text.push('\n');
-            } else {
-                text.push(' ');
-            }
-        }
-        file.write_all(text.as_bytes()).unwrap();
+        let ref mut w = BufWriter::new(file);
+        let mut encoder = png::Encoder::new(w, self.shape.0 as u32, self.shape.1 as u32);
+
+        encoder.set_color(png::ColorType::Rgb);
+        encoder.set_depth(png::BitDepth::Eight);
+        encoder.set_source_gamma(png::ScaledFloat::new(1.0 / 2.2));
+        let source_chromaticities = png::SourceChromaticities::new(
+            (0.31270, 0.32900),
+            (0.64000, 0.33000),
+            (0.30000, 0.60000),
+            (0.15000, 0.06000),
+        );
+        encoder.set_source_chromaticities(source_chromaticities);
+        let mut writer = encoder.write_header().unwrap();
+
+        writer
+            .write_image_data(&Self::flatten_pixels(&self.pixels))
+            .unwrap();
+    }
+
+    fn flatten_pixels(pixels: &[Vector3<u8>]) -> Vec<u8> {
+        pixels.iter().flat_map(Vector3::as_vec).collect()
     }
 }
 

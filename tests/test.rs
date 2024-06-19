@@ -10,9 +10,9 @@ mod tests {
             160,
             (16, 9),
         );
-        renderer.add_mesh_from_file("triangle.obj").unwrap();
+        renderer.add_mesh_from_file("assets/triangle.obj").unwrap();
         println!("{:?}", renderer);
         let image = renderer.render();
-        image.write_to_ppm("img.ppm");
+        image.write_to_png("img.png");
     }
 }

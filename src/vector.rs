@@ -36,6 +36,10 @@ impl<T: VecElem> Vector3<T> {
         Vector3 { v: [x, y, z] }
     }
 
+    pub fn as_vec(&self) -> Vec<T> {
+        self.v.to_vec()
+    }
+
     pub fn dot(&self, rhs: &Vector3<T>) -> T {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
