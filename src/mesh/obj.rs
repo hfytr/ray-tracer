@@ -1,4 +1,3 @@
-use core::panic;
 use std::{
     fs::{read_to_string, File},
     io::Write,
@@ -56,7 +55,6 @@ pub struct ObjParser;
 impl ObjParser {
     pub fn parse(path: &str) -> Result<ParseReturn, std::io::Error> {
         let file_string = read_to_string(path)?;
-        println!("{}", file_string);
         let lines: Vec<Vec<&str>> = file_string
             .lines()
             .filter(|s| s.chars().next().unwrap_or('#') != '#')
@@ -67,7 +65,6 @@ impl ObjParser {
         let mut textures = Vec::new();
         let mut triangles = Vec::new();
         for mut line in lines {
-            println!("{:?}", line);
             match line[0] {
                 "f" => {
                     assert_eq!(4, line.len(), "this face is not a triangle, please triangulate the surface before parsing");
@@ -207,7 +204,6 @@ impl ObjWriter {
         for i in 0..3 {
             text.push_str(&format!("{}//{} ", t.vertices[i], t.normals[i]));
         }
-        println!("{}", text);
         text
     }
 

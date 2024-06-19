@@ -34,6 +34,7 @@ impl Renderer {
     fn color_ray(&self, r: &Ray) -> Vector3<u8> {
         for o in self.objects.iter() {
             if o.hits(r).is_some() {
+                println!("yay");
                 return Vector3::new(255, 255, 255);
             }
         }
@@ -45,13 +46,12 @@ impl Renderer {
         let mut image = Image::new(self.viewport_size);
         for i in 0..self.viewport_size.0 {
             for j in 0..self.viewport_size.1 {
-                let pixel_pos = &self.viewport_ul + Vector3::new(0.0, -(j as f64), i as f64);
+                let pixel_pos = &self.viewport_ul + Vector3::new(i as f64, 0.0, -(j as f64));
                 let dir = &pixel_pos - &self.camera_pos;
                 let r = Ray::new(pixel_pos, dir);
+                println!("{:?}", r);
                 image[(i, j)] = self.color_ray(&r);
-                if i % 19 == 0 && j % 19 == 0 {
-                    writer.add_ray(&r, 2.0);
-                }
+                writer.add_ray(&r, 2.0);
             }
         }
         writer.add_mesh(&self.objects[0]);

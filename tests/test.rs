@@ -6,7 +6,7 @@ mod tests {
     fn test1() {
         let mut renderer = Renderer::new(
             Vector3::<f64>::default(),
-            Vector3::<f64>::new(100.0, 45.0, 90.0),
+            Vector3::<f64>::new(-80.0, 100.0, 45.0),
             160,
             (16, 9),
         );
