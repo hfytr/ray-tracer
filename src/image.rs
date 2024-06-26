@@ -20,8 +20,12 @@ impl Image {
         }
     }
 
-    pub fn write_to_png(&self, path: &str) {
-        let mut file = File::create(path).unwrap();
+    pub fn write_to_png(&self, path: &str) -> Result<(), std::io::Error> {
+        let file = File::options()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(path)?;
         let ref mut w = BufWriter::new(file);
         let mut encoder = png::Encoder::new(w, self.shape.0 as u32, self.shape.1 as u32);
 
@@ -35,11 +39,11 @@ impl Image {
             (0.15000, 0.06000),
         );
         encoder.set_source_chromaticities(source_chromaticities);
-        let mut writer = encoder.write_header().unwrap();
+        let mut writer = encoder.write_header()?;
 
-        writer
-            .write_image_data(&Self::flatten_pixels(&self.pixels))
-            .unwrap();
+        writer.write_image_data(&Self::flatten_pixels(&self.pixels))?;
+
+        Ok(())
     }
 
     fn flatten_pixels(pixels: &[Vector3<u8>]) -> Vec<u8> {
