@@ -1,11 +1,20 @@
-use std::ops::{Add, Index, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
-pub trait VecElem: Copy + Add<Output = Self> + Mul<Output = Self> + Default {}
+pub trait VecElem:
+    Copy + Add<Output = Self> + Mul<Output = Self> + Default + MulAssign<Self> + AddAssign<Self>
+{
+}
 
 pub trait SignedVecElem: VecElem + Neg<Output = Self> + Sub<Output = Self> {}
 
 impl<T> VecElem for T where
-    T: Copy + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Default
+    T: Copy
+        + Add<Output = Self>
+        + Sub<Output = Self>
+        + Mul<Output = Self>
+        + Default
+        + MulAssign<Self>
+        + AddAssign<Self>
 {
 }
 
@@ -16,6 +25,8 @@ impl<T> SignedVecElem for T where
         + Mul<Output = Self>
         + Default
         + Neg<Output = T>
+        + MulAssign<Self>
+        + AddAssign<Self>
 {
 }
 
@@ -31,9 +42,25 @@ impl<T: VecElem> Index<usize> for Vector3<T> {
     }
 }
 
+impl<T: VecElem> IndexMut<usize> for Vector3<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.v[index]
+    }
+}
+
 impl<T: VecElem> Vector3<T> {
     pub fn new(x: T, y: T, z: T) -> Vector3<T> {
         Vector3 { v: [x, y, z] }
+    }
+
+    pub fn mul_element_wise(&mut self, rhs: &Vector3<T>) {
+        self.v[0] *= rhs.v[0];
+        self.v[1] *= rhs.v[1];
+        self.v[2] *= rhs.v[2];
+    }
+
+    pub fn apply<U: VecElem>(&self, f: fn(T) -> U) -> Vector3<U> {
+        Vector3::new(f(self.v[0]), f(self.v[1]), f(self.v[2]))
     }
 
     pub fn as_vec(&self) -> Vec<T> {
@@ -102,6 +129,24 @@ macro_rules! vec_mul {
         }
     };
 }
+macro_rules! vec_add_assign {
+    ($type: ty) => {
+        fn add_assign(&mut self, rhs: $type) {
+            self[0] += rhs[0];
+            self[1] += rhs[1];
+            self[2] += rhs[2];
+        }
+    };
+}
+macro_rules! vec_mul_assign {
+    () => {
+        fn mul_assign(&mut self, rhs: T) {
+            for x in self.v.iter_mut() {
+                *x *= rhs;
+            }
+        }
+    };
+}
 
 impl<T: VecElem> Add<Vector3<T>> for Vector3<T> {
     vec_add!(Vector3<T>);
@@ -141,4 +186,28 @@ impl<T: VecElem> Mul<T> for Vector3<T> {
 
 impl<T: VecElem> Mul<T> for &Vector3<T> {
     vec_mul!();
+}
+
+impl<T: VecElem> MulAssign<T> for Vector3<T> {
+    vec_mul_assign!();
+}
+
+impl<T: VecElem> MulAssign<T> for &mut Vector3<T> {
+    vec_mul_assign!();
+}
+
+impl<T: VecElem> AddAssign<Vector3<T>> for Vector3<T> {
+    vec_add_assign!(Vector3<T>);
+}
+
+impl<T: VecElem> AddAssign<Vector3<T>> for &mut Vector3<T> {
+    vec_add_assign!(Vector3<T>);
+}
+
+impl<T: VecElem> AddAssign<&Vector3<T>> for Vector3<T> {
+    vec_add_assign!(&Vector3<T>);
+}
+
+impl<T: VecElem> AddAssign<&Vector3<T>> for &mut Vector3<T> {
+    vec_add_assign!(&Vector3<T>);
 }
