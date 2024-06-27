@@ -46,7 +46,7 @@ impl Scene {
                 result = match result {
                     None => Some((t, triangle)),
                     Some((prev_t, _)) => {
-                        if prev_t > t {
+                        if prev_t < t {
                             result
                         } else {
                             Some((t, triangle))
@@ -93,7 +93,7 @@ impl Scene {
                 result = match result {
                     None => Some((t, triangle)),
                     Some((prev_t, _)) => {
-                        if prev_t > t {
+                        if prev_t < t {
                             result
                         } else {
                             Some((t, triangle))
