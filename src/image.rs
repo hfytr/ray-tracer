@@ -8,14 +8,14 @@ use crate::vector::Vector3;
 
 #[derive(Debug)]
 pub struct Image {
-    pixels: Vec<Vector3<u8>>,
+    pixels: Vec<Vector3<f64>>,
     shape: (usize, usize),
 }
 
 impl Image {
     pub fn new(shape: (usize, usize)) -> Image {
         Image {
-            pixels: vec![Vector3::<u8>::default(); shape.0 * shape.1],
+            pixels: vec![Vector3::<f64>::default(); shape.0 * shape.1],
             shape,
         }
     }
@@ -41,18 +41,22 @@ impl Image {
         encoder.set_source_chromaticities(source_chromaticities);
         let mut writer = encoder.write_header()?;
 
-        writer.write_image_data(&Self::flatten_pixels(&self.pixels))?;
+        writer.write_image_data(&self.as_flattened_u8())?;
 
         Ok(())
     }
 
-    fn flatten_pixels(pixels: &[Vector3<u8>]) -> Vec<u8> {
-        pixels.iter().flat_map(Vector3::as_vec).collect()
+    fn as_flattened_u8(&self) -> Vec<u8> {
+        self.pixels
+            .iter()
+            .flat_map(Vector3::as_vec)
+            .map(|x| x as u8)
+            .collect()
     }
 }
 
 impl Index<(usize, usize)> for Image {
-    type Output = Vector3<u8>;
+    type Output = Vector3<f64>;
     fn index(&self, index: (usize, usize)) -> &Self::Output {
         &self.pixels[index.0 + index.1 * self.shape.0]
     }

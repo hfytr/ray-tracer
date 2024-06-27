@@ -1,6 +1,7 @@
-use std::{f64::consts::TAU, num::Wrapping};
-
-const MAX: f64 = std::u64::MAX as f64;
+use std::{
+    f64::{consts::TAU, MAX},
+    num::Wrapping,
+};
 
 #[inline]
 fn rotl(x: u64, k: i32) -> u64 {
@@ -35,8 +36,7 @@ impl NormalDist {
     pub fn normal(&mut self) -> f64 {
         let u0 = self.uniform.next() as f64 / MAX;
         let u1 = self.uniform.next() as f64 / MAX;
-        let got = (-2.0 * u0.ln()).sqrt() * (TAU * u1).cos();
-        got
+        (-2.0 * u0.ln()).sqrt() * (TAU * u1).cos()
     }
 
     pub fn new(seed: [u64; 2]) -> NormalDist {

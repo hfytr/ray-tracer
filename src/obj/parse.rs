@@ -15,7 +15,7 @@ pub fn parse_vector(line: &[&str]) -> Vector3<f64> {
         words.next().unwrap().parse::<f64>().unwrap(),
         words.next().unwrap().parse::<f64>().unwrap(),
         words.next().unwrap().parse::<f64>().unwrap(),
-    ) * PIXELS_PER_METER
+    )
 }
 
 fn collect_array<T, const N: usize>(mut i: impl Iterator<Item = T>) -> [T; N] {
@@ -95,12 +95,12 @@ impl ObjParser {
                 self.triangles.push(triangle);
             }
             "vn" => {
-                let mut normal = parse_vector(line);
+                let mut normal = parse_vector(line) * PIXELS_PER_METER;
                 normal.normalize();
                 self.point_normals.push(normal);
             }
             "v" => {
-                self.vertices.push(parse_vector(line));
+                self.vertices.push(parse_vector(line) * PIXELS_PER_METER);
             }
             "usemtl" => {
                 self.cur_material = *self
